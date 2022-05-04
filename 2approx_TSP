@@ -28,19 +28,23 @@ class Graph:
             u_x1_coord = float(lines[iterate].split()[1])
             u_y1_coord = float(lines[iterate].split()[2])
 
-            for interate_v in range(iterate+1, node_data_end):
-
+            for interate_v in range(node_data_start+1, node_data_end):
                 node_v = int(lines[interate_v].split()[0])
-                v_x2_coord = float(lines[interate_v].split()[1])
-                v_y2_coord = float(lines[interate_v].split()[2])
-                weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
-                connected_graph.append([node_u,node_v,weight_uv])
+                if node_u == node_v: #do nothing
+                    1
+                elif node_u != node_v: 
+                    #node_v = int(lines[interate_v].split()[0])
+                    v_x2_coord = float(lines[interate_v].split()[1])
+                    v_y2_coord = float(lines[interate_v].split()[2])
+                    weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
+                    connected_graph.append([node_u,node_v,weight_uv])
 
+        print(connected_graph)
 
     def weight(self, weight_type, x1, x2, y1, y2):
 
         if weight_type == 'EUC_2D':
-           weight = int(math.sqrt((x2 - x1) **2 + (y2 - y1) **2)) 
+           weight = round(int(math.sqrt((x2 - x1) **2 + (y2 - y1) **2))) 
         elif weight_type == 'GEO':
             weight = 0
 
