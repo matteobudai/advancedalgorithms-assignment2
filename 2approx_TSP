@@ -76,7 +76,21 @@ class Graph:
         if weight_type == 'EUC_2D':
            weight = int(round(math.sqrt((x2 - x1)**2 + (y2 - y1)**2))) 
         elif weight_type == 'GEO':
-            weight = 0
+            PI = 3.141592
+            RRR = 6378.388
+            # x = latitude
+            # y = longitude
+
+            new_x1 = PI * (int(x1) + 5.0 *  (x1 - int(x1)) / 3.0) / 180.0
+            new_x2 = PI * (int(x2) + 5.0 *  (x2 - int(x2)) / 3.0) / 180.0
+            new_y1 = PI * (int(y1) + 5.0 *  (y1 - int(y1)) / 3.0) / 180.0
+            new_y2 = PI * (int(y2) + 5.0 *  (y2 - int(y2)) / 3.0) / 180.0
+
+            q1 = math.cos( new_y1 - new_y2 ); 
+            q2 = math.cos( new_x1 - new_x2 ); 
+            q3 = math.cos( new_x1 + new_x2 ); 
+
+            weight = int ( RRR * math.acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0)
 
         return weight
 
