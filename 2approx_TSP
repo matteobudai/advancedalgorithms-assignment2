@@ -1,0 +1,60 @@
+import math
+import glob
+
+#Transform coordinate data into connected graph (list in format [u, v, weight])
+class Graph:
+
+    def buildGraph(self, input):
+        lines = input.readlines()
+
+        #determine what line the coordinate data starts and ends on (some files have extra blank lines at the end)
+        #node_data_start = 0
+        node_data_end = 0
+        while lines[node_data_end].split()[0] != 'EOF':
+            if lines[node_data_end].split()[0] == 'NODE_COORD_SECTION':
+                node_data_start = node_data_end
+            node_data_end += 1
+
+        #determine weight type (always on line 4)
+        line_4 = lines[4].split()
+        weight_type = line_4[len(line_4)-1]
+        connected_graph = []
+ 
+        #create a connected graph by looping through each node and connecting it to all other nodes
+        #calculate the weight between each node depending on the weight_type defined in the graph
+        for iterate in range(node_data_start+1, node_data_end):
+
+            node_u = int(lines[iterate].split()[0])
+            u_x1_coord = float(lines[iterate].split()[1])
+            u_y1_coord = float(lines[iterate].split()[2])
+
+            for interate_v in range(iterate+1, node_data_end):
+
+                node_v = int(lines[interate_v].split()[0])
+                v_x2_coord = float(lines[interate_v].split()[1])
+                v_y2_coord = float(lines[interate_v].split()[2])
+                weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
+                connected_graph.append([node_u,node_v,weight_uv])
+
+
+    def weight(self, weight_type, x1, x2, y1, y2):
+
+        if weight_type == 'EUC_2D':
+           weight = int(math.sqrt((x2 - x1) **2 + (y2 - y1) **2)) 
+        elif weight_type == 'GEO':
+            weight = 0
+
+        return weight
+
+
+for filepath in glob.iglob('tsp_dataset//*.tsp'):
+    new = Graph()
+    print(filepath)
+    new.buildGraph(open(filepath, "r"))
+
+'''
+new = Graph()
+new.buildGraph(open('tsp_dataset//ulysses22.tsp', "r"))
+'''
+
+
