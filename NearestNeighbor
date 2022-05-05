@@ -1,5 +1,6 @@
 import math
 import glob
+import copy
 from tracemalloc import start
 import time
 
@@ -27,19 +28,22 @@ class Graph:
         #create a connected graph by looping through each node and connecting it to all other nodes
         #calculate the weight between each node depending on the weight_type defined in the graph
         for iterate in range(node_data_start+1, node_data_end):
-
+            
             node_u = int(lines[iterate].split()[0])
             u_x1_coord = float(lines[iterate].split()[1])
             u_y1_coord = float(lines[iterate].split()[2])
             vertex.append(node_u)
-            
-            for interate_v in range(iterate+1, node_data_end):
-                
+
+            for interate_v in range(node_data_start+1, node_data_end):
                 node_v = int(lines[interate_v].split()[0])
-                v_x2_coord = float(lines[interate_v].split()[1])
-                v_y2_coord = float(lines[interate_v].split()[2])
-                weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
-                connected_graph.append([node_u,node_v,weight_uv])
+                if node_u == node_v: #do nothing
+                    1
+                elif node_u != node_v: 
+                    #node_v = int(lines[interate_v].split()[0])
+                    v_x2_coord = float(lines[interate_v].split()[1])
+                    v_y2_coord = float(lines[interate_v].split()[2])
+                    weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
+                    connected_graph.append([node_u,node_v,weight_uv])
             
         return(connected_graph,vertex)
 
@@ -53,9 +57,15 @@ class Graph:
 
         return weight
 
-def NearestNeighbor(G, v):
+def NearestNeighbor(g, v):
     startTime=time.time()
+    unvisited = copy.deepcopy(v)
+    startingNode=unvisited[0]
     dist=0
+    unvisited.remove(startingNode)
+    path=[startingNode]
+    while len(unvisited) >0:
+        print('ciclo')
     endTime=time.time()
     finalTime=endTime-startTime
     return dist, finalTime
@@ -73,7 +83,7 @@ new.buildGraph(open('tsp_dataset//ulysses22.tsp', "r"))
 
 graph, vertex= Graph().buildGraph(open('tsp_dataset//berlin52.tsp', "r"))
 #print(vertex)
-print(graph)
+#print(graph)
 NearestNeighborDist, NearestNeighborTime=NearestNeighbor(graph, vertex)
 #print(NearestNeighborDist, NearestNeighborTime)
 
