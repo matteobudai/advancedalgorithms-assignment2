@@ -1,7 +1,11 @@
+from cmath import inf
 import math
 import glob
 from collections import defaultdict
 import time
+from turtle import clear, update
+
+from pyparsing import PrecededBy
 
 #Create a node
 class Node:
@@ -12,7 +16,10 @@ class Node:
         self.isPresent = True
         self.index = tag-1 # Track the index of the node in the heap instead of using list.index() method which is O(n)
         self.adjacencyList = []
-
+        self.xcoord = 0
+        self.ycoord = 0
+        self.weight_type = None
+        
 #Transform coordinate data into connected graph (list in format [u, v, weight])
 class Graph:
     def __init__(self):
@@ -40,7 +47,7 @@ class Graph:
         #determine dimension (always line 3), calculate number of nodes, call create nodes method 
         line_3 = lines[3].split()
         dimension = int(line_3[len(line_3)-1])
-        num_nodes = int((dimension ** 2 - dimension)/2)
+        num_nodes = int(dimension * (dimension - 1))
         self.createNodes(num_nodes)
 
         connected_graph = []
@@ -60,39 +67,40 @@ class Graph:
                 elif node_u != node_v: 
                     v_x2_coord = float(lines[interate_v].split()[1])
                     v_y2_coord = float(lines[interate_v].split()[2])
-                    weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
+                    weight_uv = weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
                     connected_graph.append([node_u,node_v,weight_uv])
-                    self.makeNodes(node_u, node_v, weight_uv)
-            
-        #print(connected_graph)
+                    self.makeNodes(node_u,u_x1_coord,u_y1_coord,node_v, weight_uv, weight_type)
 
     #Create all of the nodes
-    def makeNodes(self, tag, adjTag, adjCost):
+    def makeNodes(self, tag, tag_x, tag_y, adjTag, adjCost, weight_type):
         self.nodes[tag].adjacencyList.append([self.nodes[adjTag], adjCost])
         self.nodes[adjTag].adjacencyList.append([self.nodes[tag], adjCost])
+        self.nodes[tag].xcoord = tag_x
+        self.nodes[tag].ycoord = tag_y
+        self.nodes[tag].weight_type = weight_type
 
-    def weight(self, weight_type, x1, x2, y1, y2):
+def weight(weight_type, x1, x2, y1, y2):
 
-        if weight_type == 'EUC_2D':
-           weight = int(round(math.sqrt((x2 - x1)**2 + (y2 - y1)**2))) 
-        elif weight_type == 'GEO':
-            PI = 3.141592
-            RRR = 6378.388
+    if weight_type == 'EUC_2D':
+        weight_xy = int(round(math.sqrt((x2 - x1)**2 + (y2 - y1)**2)))
+    else:
+        PI = 3.141592
+        RRR = 6378.388
             # x = latitude
             # y = longitude
 
-            new_x1 = PI * (int(x1) + 5.0 *  (x1 - int(x1)) / 3.0) / 180.0
-            new_x2 = PI * (int(x2) + 5.0 *  (x2 - int(x2)) / 3.0) / 180.0
-            new_y1 = PI * (int(y1) + 5.0 *  (y1 - int(y1)) / 3.0) / 180.0
-            new_y2 = PI * (int(y2) + 5.0 *  (y2 - int(y2)) / 3.0) / 180.0
+        new_x1 = PI * (int(x1) + 5.0 *  (x1 - int(x1)) / 3.0) / 180.0
+        new_x2 = PI * (int(x2) + 5.0 *  (x2 - int(x2)) / 3.0) / 180.0
+        new_y1 = PI * (int(y1) + 5.0 *  (y1 - int(y1)) / 3.0) / 180.0
+        new_y2 = PI * (int(y2) + 5.0 *  (y2 - int(y2)) / 3.0) / 180.0
 
-            q1 = math.cos( new_y1 - new_y2 ); 
-            q2 = math.cos( new_x1 - new_x2 ); 
-            q3 = math.cos( new_x1 + new_x2 ); 
+        q1 = math.cos( new_y1 - new_y2 ); 
+        q2 = math.cos( new_x1 - new_x2 ); 
+        q3 = math.cos( new_x1 + new_x2 ); 
 
-            weight = int ( RRR * math.acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0)
+        weight_xy = int ( RRR * math.acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0)
 
-        return weight
+    return weight_xy
 
 class ArrayHeap(list):
     def __init__(self, array):
@@ -169,13 +177,11 @@ class MinHeap:
         #finally call minheapify() to restructure/maintain the min heap data structure
         self.minHeapify(0)
         return min
-        
-    
-#Algorithm
+            
 def Prim (G: Graph, s: Node):
     start=time.time()  
     for u in G.nodes.values():
-         u.key= math.inf
+        u.key= math.inf
     s.key = 0
     MST = 0
     Q = MinHeap(list(G.nodes.values()), s)
@@ -185,34 +191,84 @@ def Prim (G: Graph, s: Node):
             if v[0].isPresent and v[1] < v[0].key:
                 #if v[0].key is less than infinity it implies it has already been visited and added to the MST
                 #we will remove v[0]key, redefine it has v[1], and replace it's value in the MST
-                if v[0].key < math.inf:
+                if v[0].key < math.inf and v[0].key != 0:
                     MST -= v[0].key
                 v[0].parent = u
                 v[0].key = v[1]
                 Q.shiftUp(v[0].index)   
                 MST += v[0].key
     end=time.time()
-    return MST          
 
-results = []
-count_files = 0
+    return G
+    #return MST
+             
+def preorder(G: Graph, s: Node, preorder_list: list):
 
-for filepath in glob.iglob('tsp_dataset/*.tsp'):
-    start = time.time()
+    preorder_list.append(s)
+
+    for u in G.nodes.values():
+        if u.parent == s:
+            preorder(G, u,preorder_list)
+
+    return preorder_list
+
+def approx_metric_tsp (G: Graph, s: Node):
+
+    MST = Prim(G, s)
+    pre_order = preorder(MST, s, [])
+    tsp_cycle = pre_order
+    tsp_cycle.append(s)
+    tsp_cost = 0
+    i = 0
+    j = 1
+    for u in tsp_cycle:
+        if tsp_cycle[i] == s and i > 0: #do nothing, at the end of the cycle
+            1
+        else:
+            tsp_cost += weight(tsp_cycle[0].weight_type, tsp_cycle[i].xcoord, tsp_cycle[j].xcoord, tsp_cycle[i].ycoord, tsp_cycle[j].ycoord)
+            i += 1
+            j += 1
+    return tsp_cost
+
+
+data = [
+    ["tsp_dataset/burma14.tsp", 3323],
+    ["tsp_dataset/ulysses16.tsp", 6859],
+    ["tsp_dataset/ulysses22.tsp", 7013],
+    ["tsp_dataset/eil51.tsp", 426],
+    ["tsp_dataset/berlin52.tsp", 7542],
+    ["tsp_dataset/kroD100.tsp", 21294],
+    ["tsp_dataset/kroA100.tsp", 21282],
+    ["tsp_dataset/ch150.tsp", 6528],
+    ["tsp_dataset/gr202.tsp", 40160],
+    ["tsp_dataset/gr229.tsp", 134602],
+    ["tsp_dataset/pcb442.tsp", 50778],
+    ["tsp_dataset/d493.tsp", 35002],
+    ["tsp_dataset/dsj1000.tsp", 18659688]
+]
+
+
+for filepath, opt_solution in data:
+    
     startingNode = 1 # Root node tag
     new = Graph()
     new.buildGraph(open(filepath, "r"))
-    MST = Prim(new, new.nodes.get(startingNode))
-    #print(MST)
+
+    start = time.time()
+    solution = approx_metric_tsp(new, new.nodes.get(startingNode))
     end = time.time()
-    results.append([filepath, MST,round(end - start,5)])
-    count_files += 1
+    time_cost = '%.2E' % (end - start)
+
+    print("File name: ", filepath) 
+    print("My solution: ", solution)
+    print("Optimal Solution: ", opt_solution)
+    print("Execution Time: ", time_cost, "\n")
 
 
-'''
-new = Graph()
-new.buildGraph(open('tsp_dataset//ulysses22.tsp', "r"))
-'''
+
+
+
+
 
 
 
