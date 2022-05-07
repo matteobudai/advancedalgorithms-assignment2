@@ -1,5 +1,4 @@
 import math
-import glob
 import copy
 from tracemalloc import start
 import time
@@ -45,7 +44,7 @@ class Graph:
                     weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
                     connected_graph.append([node_u,node_v,weight_uv])
             
-        return(connected_graph,vertex)
+        return(connected_graph, vertex)
 
 
     def weight(self, weight_type, x1, x2, y1, y2):
@@ -86,13 +85,13 @@ def minDist(p, g, l):
 
 
 def NearestNeighbor(g, v):
-    startTime=time.time()
+    start= time.time()
     unvisited = copy.deepcopy(v)
     startingNode=unvisited[0]
-    dist=0
-    length=len(v)
     unvisited.remove(startingNode)
     path=[startingNode]
+    dist=0
+    length=len(v)
     while len(unvisited) >0:
         d, vertex= minDist(path,g, length)
         unvisited.remove(vertex)
@@ -100,25 +99,35 @@ def NearestNeighbor(g, v):
         dist=dist+d
     dist=dist+g[path[-1]-2][2]
     path.append(startingNode)
-    endTime=time.time()
-    finalTime=endTime-startTime
-    print('dist:', dist)
-    print('time: ', finalTime)
-    return dist, finalTime
+    end = time.time()
+    time_cost =  end - start
+    return dist, time_cost
 
-'''
-for filepath in glob.iglob('tsp_dataset//*.tsp'):
-    new = Graph()
-    print(filepath)
-    new.buildGraph(open(filepath, "r"))
-'''
-'''
-new = Graph()
-new.buildGraph(open('tsp_dataset//ulysses22.tsp', "r"))
-'''
-for filepath in glob.iglob('tsp_dataset//*.tsp'):
-    graph, vertex= Graph().buildGraph(open(filepath, "r"))
-    print(filepath)
-    NearestNeighborDist, NearestNeighborTime=NearestNeighbor(graph, vertex)
+data = [
+    ["tsp_dataset/burma14.tsp", 3323],
+    ["tsp_dataset/ulysses16.tsp", 6859],
+    ["tsp_dataset/ulysses22.tsp", 7013],
+    ["tsp_dataset/eil51.tsp", 426],
+    ["tsp_dataset/berlin52.tsp", 7542],
+    ["tsp_dataset/kroD100.tsp", 21294],
+    ["tsp_dataset/kroA100.tsp", 21282],
+    ["tsp_dataset/ch150.tsp", 6528],
+    ["tsp_dataset/gr202.tsp", 40160],
+    ["tsp_dataset/gr229.tsp", 134602],
+    ["tsp_dataset/pcb442.tsp", 50778],
+    ["tsp_dataset/d493.tsp", 35002],
+    ["tsp_dataset/dsj1000.tsp", 18659688]
+]
+
+for filepath, opt_solution in data:
+    graph, vertex = Graph().buildGraph(open(filepath, "r"))
+    solution, time_cost= NearestNeighbor(graph, vertex)
+    error = ((solution-opt_solution)/opt_solution)*100
+
+    print("File name: ", filepath) 
+    print("My solution: ", solution)
+    print("Optimal Solution: ", opt_solution)
+    print("Execution Time: ","%.5f"%(time_cost))
+    print("Error: ", "%.2f"%(error), "%\n")
 
 
