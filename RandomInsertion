@@ -84,6 +84,9 @@ def minDist(p, g, l):
         i=i+1
     return dist,vertex
 
+# Function to get dist distance:
+# Input: Graph, node from, node to
+# Output: Weight
 def u_v_dist(graph, u, v):
     w = 0
     for i in graph:
@@ -91,58 +94,89 @@ def u_v_dist(graph, u, v):
             w = i[2]
     return w
 
-#'''
+# Function to apply Random Insertion algorithm
+# Input: Graph, vertices
+# Output: Sum of weights, Timer 
+
 def random_init(graph, vertex):
+    # Start time point
     Tik = time.time()
 
-    length = len(vertex)
-    dist = 0
-
+    # List to keep partial circuit
     path = []
+    # List to keep unvisited nodes (copy of whole nodes)
     unvisitied = copy.deepcopy(vertex)
+
     
+    # Add first node to path from unvisited list 
     path.append(unvisitied[0])
+    # Remove first node from unvisited list 
     unvisitied.remove(path[0])
 
+    # Variable of lowest cost node to fisrt
+    j = 0
+    # Variable equal to +inf for searching of minimal cost way from initial node
     min_ = math.inf
-    for i in graph[ ( length * (path[0] - 1) ) : ( path[0] * length ) ]:
-        if i != path[0]:
+    # Go through all graph and find cheapest next node
+    for i in graph:
+        # If first node equal to our 
+        if i[0] == path[0]:
+            # iI weight is lower
             if i[2] <= min_:
+                # Save lowest weight
                 min_ = i[2]
+                # Save node connected by lowest cost edge
                 j = i[1]
-
+            
+    # Update path
     path.append(j)
+    # Remove J from unvisited list
     unvisitied.remove(j)
-    print("J: ", j)
 
+    # While there are unvisited nodes
     while len(unvisitied) > 0:
+        # Initital minimum to + inf
         min_ = math.inf
+        # Temporary variable to keep node with lowest cost edge 
         flag = 0
         
+        # Take random node from unvisited list
         k = random.choice(unvisitied)
-
-        for i in path:
-            if i != j:
-                
-                triangle = u_v_dist(graph, i, k) + u_v_dist(graph, k, j) - u_v_dist(graph, i, j)
-                
-                if triangle < min_:
-                    min_ = math.inf
-                    flag = i
-            print ("Triangle: ", triangle)
-        path.insert( path.index(flag) + 1, k)
-        #dist += u_v_dist(graph, flag, k)
         
+        # Cycle through all partial circuit
+        for i in path:
+            # Check all nodes except last one
+            if i != j:
+                # Variable to keep result of triangle equations
+                triangle = u_v_dist(graph, i, k) + u_v_dist(graph, k, j) - u_v_dist(graph, i, j)
+                # If result of triangle equation lower than min
+                if triangle < min_:
+                    # Keep new min
+                    min_ = triangle
+                    # Keep the node that goes before k
+                    flag = i
+                
+            
+        # Add k node after i from cycle (flag)
+        path.insert( path.index(flag) + 1, k)
+        # Remove k from unvisited list
         unvisitied.remove(k)
 
+    # Variable to keep distance between nodes
+    dist = 0
+    # Cycle for weight
+    # From 0 to len - 1 
+    # Get result of sum of weights of nodes with index_i and index_i_+_1
     for i in range(len(path) - 1):
         dist += u_v_dist( graph, path[i], path[i+1] )
+    
+    # End time point
     Toc = time.time()
+    # Time of Execution 
     timer = Toc - Tik
     
     print("Path: ", path)
-    return  dist,timer 
-#'''
+    return  dist, timer 
 
 
 data = [
