@@ -1,0 +1,176 @@
+import math
+import glob
+import copy
+from tracemalloc import start
+import time
+import random
+
+#Transform coordinate data into connected graph (list in format [u, v, weight])
+class Graph:
+
+    def buildGraph(self, input):
+        lines = input.readlines()
+
+        #determine what line the coordinate data starts and ends on (some files have extra blank lines at the end)
+        #node_data_start = 0
+        node_data_end = 0
+        while lines[node_data_end].split()[0] != 'EOF':
+            if lines[node_data_end].split()[0] == 'NODE_COORD_SECTION':
+                node_data_start = node_data_end
+            node_data_end += 1
+
+        #determine weight type (always on line 4)
+        line_4 = lines[4].split()
+        weight_type = line_4[len(line_4)-1]
+        connected_graph = []
+        vertex= []
+        
+        
+        #create a connected graph by looping through each node and connecting it to all other nodes
+        #calculate the weight between each node depending on the weight_type defined in the graph
+        for iterate in range(node_data_start+1, node_data_end):
+            
+            node_u = int(lines[iterate].split()[0])
+            u_x1_coord = float(lines[iterate].split()[1])
+            u_y1_coord = float(lines[iterate].split()[2])
+            vertex.append(node_u)
+
+            for interate_v in range(node_data_start+1, node_data_end):
+                node_v = int(lines[interate_v].split()[0])
+                if node_u == node_v: #do nothing
+                    1
+                elif node_u != node_v: 
+                    #node_v = int(lines[interate_v].split()[0])
+                    v_x2_coord = float(lines[interate_v].split()[1])
+                    v_y2_coord = float(lines[interate_v].split()[2])
+                    weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
+                    connected_graph.append([node_u,node_v,weight_uv])
+            
+        return(connected_graph, vertex)
+
+
+    def weight(self, weight_type, x1, x2, y1, y2):
+
+        if weight_type == 'EUC_2D':
+           weight = int(math.sqrt((x2 - x1) **2 + (y2 - y1) **2)) 
+        elif weight_type == 'GEO':
+            PI = 3.141592
+            RRR = 6378.388
+            # x = latitude
+            # y = longitude
+
+            new_x1 = PI * (int(x1) + 5.0 *  (x1 - int(x1)) / 3.0) / 180.0
+            new_x2 = PI * (int(x2) + 5.0 *  (x2 - int(x2)) / 3.0) / 180.0
+            new_y1 = PI * (int(y1) + 5.0 *  (y1 - int(y1)) / 3.0) / 180.0
+            new_y2 = PI * (int(y2) + 5.0 *  (y2 - int(y2)) / 3.0) / 180.0
+
+            q1 = math.cos( new_y1 - new_y2 ); 
+            q2 = math.cos( new_x1 - new_x2 ); 
+            q3 = math.cos( new_x1 + new_x2 ); 
+
+            weight = int ( RRR * math.acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0)
+
+        return weight
+
+def minDist(p, g, l):
+    dist= math.inf
+    node= p[-1]
+    vertex=None
+    i=(l-1)*(node-1)
+    while(i<(l-1)*node):
+        if g[i][2]<dist and g[i][1] not in p:
+            dist=g[i][2]
+            vertex=g[i][1]
+        i=i+1
+    return dist,vertex
+
+def u_v_dist(graph, u, v):
+    w = 0
+    for i in graph:
+        if i[0] == u and i[1] == v:
+            w = i[2]
+    return w
+
+#'''
+def random_init(graph, vertex):
+    Tik = time.time()
+
+    length = len(vertex)
+    dist = 0
+
+    path = []
+    unvisitied = copy.deepcopy(vertex)
+    
+    path.append(unvisitied[0])
+    unvisitied.remove(path[0])
+
+    min_ = math.inf
+    for i in graph[ ( length * (path[0] - 1) ) : ( path[0] * length ) ]:
+        if i != path[0]:
+            if i[2] <= min_:
+                min_ = i[2]
+                j = i[1]
+
+    path.append(j)
+    unvisitied.remove(j)
+    print("J: ", j)
+
+    while len(unvisitied) > 0:
+        min_ = math.inf
+        flag = 0
+        
+        k = random.choice(unvisitied)
+
+        for i in path:
+            if i != j:
+                
+                triangle = u_v_dist(graph, i, k) + u_v_dist(graph, k, j) - u_v_dist(graph, i, j)
+                
+                if triangle < min_:
+                    min_ = math.inf
+                    flag = i
+            print ("Triangle: ", triangle)
+        path.insert( path.index(flag) + 1, k)
+        #dist += u_v_dist(graph, flag, k)
+        
+        unvisitied.remove(k)
+
+    for i in range(len(path) - 1):
+        dist += u_v_dist( graph, path[i], path[i+1] )
+    Toc = time.time()
+    timer = Toc - Tik
+    
+    print("Path: ", path)
+    return  dist,timer 
+#'''
+
+
+data = [
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/burma14.tsp", 3323],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/ulysses16.tsp", 6859],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/ulysses22.tsp", 7013],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/eil51.tsp", 426]
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/berlin52.tsp", 7542],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/kroD100.tsp", 21294],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/kroA100.tsp", 21282],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/ch150.tsp", 6528],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/gr202.tsp", 40160],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/gr229.tsp", 134602],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/pcb442.tsp", 50778],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/d493.tsp", 35002],
+    #["/Users/sanjartlepin/Downloads/AA/tsp_dataset/dsj1000.tsp", 18659688]
+]
+
+for filepath, opt_solution in data:
+    graph, vertex = Graph().buildGraph(open(filepath, "r"))
+    length = len(vertex)
+    
+    solution, time_cost = random_init(graph, vertex)
+    error = ((solution-opt_solution)/opt_solution)*100
+
+    print("length", length)
+    print("File name: ", filepath) 
+    print("My solution: ", solution)
+    print("Optimal Solution: ", opt_solution)
+    print("Execution Time: ","%.5f"%(time_cost))
+    print("Error: ", "%.2f"%(error), "%\n")
