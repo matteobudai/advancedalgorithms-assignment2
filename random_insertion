@@ -1,0 +1,147 @@
+from cmath import log
+import math
+import random
+
+
+class Graph:
+
+    def buildGraph(self, input):
+        lines = input.readlines()
+
+        #determine what line the coordinate data starts and ends on (some files have extra blank lines at the end)
+        #node_data_start = 0
+        node_data_end = 0
+        while lines[node_data_end].split()[0] != 'EOF':
+            if lines[node_data_end].split()[0] == 'NODE_COORD_SECTION':
+                node_data_start = node_data_end
+            node_data_end += 1
+
+        #determine weight type (always on line 4)
+        line_4 = lines[4].split()
+        weight_type = line_4[len(line_4)-1]
+        connected_graph = []
+        vertex= []
+        
+        
+        #create a connected graph by looping through each node and connecting it to all other nodes
+        #calculate the weight between each node depending on the weight_type defined in the graph
+        for iterate in range(node_data_start+1, node_data_end):
+            
+            node_u = int(lines[iterate].split()[0])
+            u_x1_coord = float(lines[iterate].split()[1])
+            u_y1_coord = float(lines[iterate].split()[2])
+            vertex.append(node_u)
+
+            for interate_v in range(node_data_start+1, node_data_end):
+                node_v = int(lines[interate_v].split()[0])
+                if node_u == node_v: #do nothing
+                    1
+                elif node_u != node_v: 
+                    #node_v = int(lines[interate_v].split()[0])
+                    v_x2_coord = float(lines[interate_v].split()[1])
+                    v_y2_coord = float(lines[interate_v].split()[2])
+                    weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
+                    connected_graph.append([node_u,node_v,weight_uv])
+            
+        return(connected_graph, vertex)
+
+    def weight(self, weight_type, x1, x2, y1, y2):
+
+        if weight_type == 'EUC_2D':
+           weight = int(round(math.sqrt((x2 - x1)**2 + (y2 - y1)**2)))
+        elif weight_type == 'GEO':
+            PI = 3.141592
+            RRR = 6378.388
+            # x = latitude
+            # y = longitude
+
+            new_x1 = PI * (int(x1) + 5.0 *  (x1 - int(x1)) / 3.0) / 180.0
+            new_x2 = PI * (int(x2) + 5.0 *  (x2 - int(x2)) / 3.0) / 180.0
+            new_y1 = PI * (int(y1) + 5.0 *  (y1 - int(y1)) / 3.0) / 180.0
+            new_y2 = PI * (int(y2) + 5.0 *  (y2 - int(y2)) / 3.0) / 180.0
+
+            q1 = math.cos( new_y1 - new_y2 ); 
+            q2 = math.cos( new_x1 - new_x2 ); 
+            q3 = math.cos( new_x1 + new_x2 ); 
+
+            weight = int ( RRR * math.acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0)
+
+        return weight
+
+def random_insertion(graph, unvisited_nodes: list, starting_node):
+
+    TSP_nodes = []
+    TSP_nodes.append(starting_node)
+    unvisited_nodes.remove(starting_node)
+
+    first_insertion = []
+    for node_j in range(0,len(graph)):
+        if starting_node == graph[node_j][0]:
+            first_insertion.append(graph[node_j])
+
+    first_insertion.sort(key = lambda x: x[2])
+
+    first_node = first_insertion[0][1]
+    TSP_nodes.append(first_node)
+    unvisited_nodes.remove(first_node)
+
+    second_node = random.choice(unvisited_nodes)
+    TSP_nodes.insert(1, second_node)
+    unvisited_nodes.remove(second_node)
+
+    #begin checking for triangle in-equality 
+    while len(unvisited_nodes) > 0:
+
+        random_k = random.choice(unvisited_nodes)
+        weight_check = []
+        for node in TSP_nodes:
+            for node_k in range(0,len(graph)):
+                if graph[node_k][0] == node and graph[node_k][1] == random_k:
+                    weight_check.append([graph[node_k][2],graph[node_k][0]])
+        weight_check.sort()
+        i = weight_check[0][1]
+        j = weight_check[1][1]
+        index_to_insert = min(TSP_nodes.index(i)+1,TSP_nodes.index(j)+1)
+        TSP_nodes.insert(index_to_insert,random_k)
+        unvisited_nodes.remove(random_k)
+
+    TSP_nodes.append(starting_node)
+
+    tsp_cost = 0
+    i = 0
+    j = 1
+    for u in TSP_nodes:
+        if TSP_nodes[i] == starting_node and i > 0: #do nothing, at the end of the cycle
+            1
+        else:
+            for nodes in range(0,len(graph)):
+                if graph[nodes][0] == TSP_nodes[i] and graph[nodes][1] == TSP_nodes[j]:
+                    tsp_cost += graph[nodes][2]
+            i += 1
+            j += 1
+
+    #print(tsp_cost)
+    return tsp_cost
+
+
+data = [
+    ["tsp_dataset/burma14.tsp", 3323],
+    ["tsp_dataset/ulysses16.tsp", 6859],
+    ["tsp_dataset/ulysses22.tsp", 7013],
+    ["tsp_dataset/eil51.tsp", 426],
+    ["tsp_dataset/berlin52.tsp", 7542],
+    ["tsp_dataset/kroD100.tsp", 21294],
+    ["tsp_dataset/kroA100.tsp", 21282],
+    ["tsp_dataset/ch150.tsp", 6528],
+    ["tsp_dataset/gr202.tsp", 40160],
+    ["tsp_dataset/gr229.tsp", 134602],
+    ["tsp_dataset/pcb442.tsp", 50778],
+    ["tsp_dataset/d493.tsp", 35002],
+    ["tsp_dataset/dsj1000.tsp", 18659688]
+]
+
+for filepath, opt_solution in data:
+    graph, nodes = Graph().buildGraph(open(filepath, "r"))
+    n = len(nodes)
+    print(random_insertion(graph, nodes, 1))
+
