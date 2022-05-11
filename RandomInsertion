@@ -102,6 +102,9 @@ def random_init(graph, vertex):
     # Start time point
     Tik = time.time()
 
+
+    # Variable of length of vertex
+    length = len(vertex)
     # List to keep partial circuit
     path = []
     # List to keep unvisited nodes (copy of whole nodes)
@@ -118,9 +121,7 @@ def random_init(graph, vertex):
     # Variable equal to +inf for searching of minimal cost way from initial node
     min_ = math.inf
     # Go through all graph and find cheapest next node
-    for i in graph:
-        # If first node equal to our 
-        if i[0] == path[0]:
+    for i in graph[(path[0]-1)*(length-1):path[0]*(length-1)]:
             # iI weight is lower
             if i[2] <= min_:
                 # Save lowest weight
