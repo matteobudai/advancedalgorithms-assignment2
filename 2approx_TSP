@@ -47,8 +47,7 @@ class Graph:
         #determine dimension (always line 3), calculate number of nodes, call create nodes method 
         line_3 = lines[3].split()
         dimension = int(line_3[len(line_3)-1])
-        num_nodes = int(dimension * (dimension - 1))
-        self.createNodes(num_nodes)
+        self.createNodes(dimension)
 
         connected_graph = []
 
@@ -230,7 +229,6 @@ def approx_metric_tsp (G: Graph, s: Node):
             j += 1
     return tsp_cost
 
-
 data = [
     ["tsp_dataset/burma14.tsp", 3323],
     ["tsp_dataset/ulysses16.tsp", 6859],
@@ -246,7 +244,6 @@ data = [
     ["tsp_dataset/d493.tsp", 35002],
     ["tsp_dataset/dsj1000.tsp", 18659688]
 ]
-
 
 for filepath, opt_solution in data:
     
