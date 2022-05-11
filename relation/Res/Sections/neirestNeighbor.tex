@@ -1,13 +1,42 @@
-\section{Neirest Neighbor Algortihm}\label{neirest}
+\section{Nearest Neighbor Algortihm}\label{nearest}
+As first constructive heuristics we have chosen Nearest Neighbor. Its goal is to add the neighbor with the minimum weight not in the path. The steps are the following:\\
+
+\begin{enumerate}
+	\item  \textbf{Initialization:} start from the single-node path 0;
+	\item  \textbf{Selection:} let (v0, ..., vk) be the current path. Find the vertex vk+1 not in the path with minimimun distance from vk;
+	\item  \textbf{Insertion:} insert vk+1 immedaitely after vk;
+	\item repeat from (2) until all vertices are inserted in the path.
+\end{enumerate}  
 
 
-\subsection{Input and Data Structures}
+\subsection{Functions}
+The implementation doesn't require particular data structure so we created two functions for the algorithm:
+\begin{itemize}
+	\item  \textbf{NearestNeighbor(g,v)}: method that builds the hamiltonian circuit and returns its weight and the time;
+	\item  \textbf{minDist(p,g,l)}: method that finds the neighbor with the minimum weight between the last vertex insert in the path p and its neighbors that are in some indexes of the list g.
+\end{itemize}
 
 
 \subsection{Implementation}
-
-
-\subsection{Complexity}
-
+The final solution is the following:
+\begin{itemize}
+	\item We start the time;
+	\item We execute a deep copy unvisited of the original list v;
+	\item We follow the algorithm and we start from the node 0 \textit{(startingNode)} of the unvisited list. \item We remove the starting node from the list unvisited and we add always the starting node in our path \textit{(is a list)};
+	\item We initialize our solution \textit{(dist)} to zero and we start our cycle until we have visited all vertex \textit{(len(unvisited)>0))};
+	\item In the while cycle:
+		\begin{enumerate}
+			\item  We find the neighbor with the minimum distance with the function minDist:
+				\begin{itemize}
+				\item  It initalize the distance to infinite, the vertex to none and it take the last node of the path \textit{(p)};
+				\item  In the cycle it checks all the neighbors of the node and returns the distance and the vertex with the minimum distance that is not just in p.
+				\end{itemize}
+			\item We remove the vertex found from the list unvisited and we add the vertex in the path;
+			\item We add the distance of the vertex found and we continue with the next iteration until we removed all the vertex from unvisited. 
+		\end{enumerate}
+	\item When we finish the while cycle we add to dist the distance between the last node in the path and the startingNode and to close the hamiltonian cycle we add the vertex to the path;
+	\item We end the time and we calculate the time cost;
+	\item We return the solution and the time.
+\end{itemize}
 
 \pagebreak

@@ -93,7 +93,7 @@ def NearestNeighbor(g, v):
     dist=0
     length=len(v)
     while len(unvisited) >0:
-        d, vertex= minDist(path,g, length)
+        d, vertex= minDist(path,g,length)
         unvisited.remove(vertex)
         path.append(vertex)
         dist=dist+d
