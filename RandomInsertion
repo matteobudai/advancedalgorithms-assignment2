@@ -94,6 +94,22 @@ def u_v_dist(graph, u, v):
             w = i[2]
     return w
 
+# Function to return node connected by lowest cost edge
+# Input: Graph and node from
+# Output: Node connected by lowest edge
+def u_low_dist(graph, u):
+    new_node = 0
+    
+    min_ = math.inf
+    for i in graph[(u-1)*(length-1):u*(length-1)]:
+            # iI weight is lower
+            if i[2] <= min_:
+                # Save lowest weight
+                min_ = i[2]
+                # Save node connected by lowest cost edge
+                new_node = i[1]
+    return new_node
+
 # Function to apply Random Insertion algorithm
 # Input: Graph, vertices
 # Output: Sum of weights, Timer 
@@ -117,17 +133,7 @@ def random_init(graph, vertex):
     unvisitied.remove(path[0])
 
     # Variable of lowest cost node to fisrt
-    j = 0
-    # Variable equal to +inf for searching of minimal cost way from initial node
-    min_ = math.inf
-    # Go through all graph and find cheapest next node
-    for i in graph[(path[0]-1)*(length-1):path[0]*(length-1)]:
-            # iI weight is lower
-            if i[2] <= min_:
-                # Save lowest weight
-                min_ = i[2]
-                # Save node connected by lowest cost edge
-                j = i[1]
+    j = u_low_dist(graph, path[0])
             
     # Update path
     path.append(j)
