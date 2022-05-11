@@ -89,8 +89,8 @@ def minDist(p, g, l):
 # Output: Weight
 def u_v_dist(graph, u, v):
     w = 0
-    for i in graph:
-        if i[0] == u and i[1] == v:
+    for i in graph[(u-1)*(length-1):u*(length-1)]:
+        if i[1] == v:
             w = i[2]
     return w
 
