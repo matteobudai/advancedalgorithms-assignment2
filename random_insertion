@@ -70,34 +70,46 @@ class Graph:
 
 def random_insertion(graph, unvisited_nodes: list, starting_node):
 
+    #append starting node to TSP cycle and remove from unvisited nodes
     TSP_nodes = []
     TSP_nodes.append(starting_node)
     unvisited_nodes.remove(starting_node)
 
+    #first inserted node will be the one that minimizes weight between the starting node
+    #i first find all edges that contain the starting node and add them to a list called first_insertion
     first_insertion = []
     for node_j in range(0,len(graph)):
         if starting_node == graph[node_j][0]:
             first_insertion.append(graph[node_j])
-
+    #sort the list
     first_insertion.sort(key = lambda x: x[2])
-
+    #take the node at the zero position of the sorted list
+    #add this node to the TSP cycle and remove from the unvisited nodes
     first_node = first_insertion[0][1]
     TSP_nodes.append(first_node)
     unvisited_nodes.remove(first_node)
 
+    #choose a random node
+    #since this is only the second node, we will always insert between the 0 and 1 node
+    #no need to check for triangle inequality at this stage
     second_node = random.choice(unvisited_nodes)
     TSP_nodes.insert(1, second_node)
     unvisited_nodes.remove(second_node)
 
-    #begin checking for triangle in-equality 
+    #begin checking for triangle in-equality and inserting random nodes
     while len(unvisited_nodes) > 0:
 
+        #choose a random node, k, that has node been visited
         random_k = random.choice(unvisited_nodes)
         weight_check = []
+        #for each node in the existing TSP cycle, add it's edge weight and node id to the weight_check list
         for node in TSP_nodes:
             for node_k in range(0,len(graph)):
                 if graph[node_k][0] == node and graph[node_k][1] == random_k:
                     weight_check.append([graph[node_k][2],graph[node_k][0]])
+        #sort the list and take the 0 and 1 position (node i and j respectively)
+        #this will ensure we insert the random node k between the two existing nodes i & j in the existing TSP cycle
+        #which will minimize w(i, k) + w(k, j) − w(i, j) 
         weight_check.sort()
         i = weight_check[0][1]
         j = weight_check[1][1]
@@ -105,8 +117,10 @@ def random_insertion(graph, unvisited_nodes: list, starting_node):
         TSP_nodes.insert(index_to_insert,random_k)
         unvisited_nodes.remove(random_k)
 
+    #once all nodes have been visited and added to the TSP cycle, add the starting node at the node to complete Hamiltonian cycle
     TSP_nodes.append(starting_node)
 
+    #calculate the weight of the Hamiltonian cycle
     tsp_cost = 0
     i = 0
     j = 1
