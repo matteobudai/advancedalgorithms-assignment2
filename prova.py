@@ -75,7 +75,6 @@ def minDist(g, l):
     dist= math.inf
     vertex=None
     i=0
-   
     while(i<(l-1)):
         if g[i][2]<dist:
             dist=g[i][2]
@@ -83,30 +82,37 @@ def minDist(g, l):
         i=i+1
     return vertex
 
-def buildPath(p, g, l, r):
+def buildPath(p, g, l, k):
     dist= math.inf
     i=0
     j=1
     while(i<len(p)-1):  
-        if(r<p[i]):
-            s=g[(p[i]-1)*(l-1)+r-1]
+        if(k<p[i]):
+            s=g[(p[i]-1)*(l-1)+k-1]
         else:
-            s=g[(p[i]-1)*(l-1)+r-2]
+            s=g[(p[i]-1)*(l-1)+k-2]
         
-        if(r<p[j]):
-            h=g[(r-1)*(l-1)+(p[j])-2]
+        if(k<p[j]):
+            h=g[(k-1)*(l-1)+(p[j])-2]
         else:
-            h=g[(r-1)*(l-1)+(p[j])-1]
+            h=g[(k-1)*(l-1)+(p[j])-1]
 
         if(p[i]<p[j]):
             z=g[(p[i]-1)*(l-1)+p[j]-2]
         else:
             z=g[(p[i]-1)*(l-1)+p[j]-1]
+
+        print('(i,k,w)', s)
+        print('(k,j,w)', h)
+        print('(i,j,w)', z)
+        print('distance found: ', s[2]+h[2]-z[2])
         if s[2]+h[2]-z[2]<dist:
             dist=s[2]+h[2]-z[2]
             position=i+1
         j=j+1
         i=i+1
+    print('minimum:', dist)
+    print('position to add: ', position)
     return position
 
 def buildDist(p,g,l):
@@ -116,15 +122,17 @@ def buildDist(p,g,l):
     while(i<len(p)-1):
         if(p[i]<p[j]):
             dist=dist+g[(p[i]-1)*(l-1)+p[j]-2][2]
+            print('current dist', g[(p[i]-1)*(l-1)+p[j]-2])
         else:
             dist=dist+g[(p[i]-1)*(l-1)+p[j]-1][2]
+            print('current dist', g[(p[i]-1)*(l-1)+p[j]-1])
         i=i+1
         j=j+1
     return dist
 
 
 
-def NearestNeighbor(g, v):
+def RandomInsertion(g, v):
     start= time.time()
     unvisited = copy.deepcopy(v)
     startingNode=unvisited[0]
@@ -134,14 +142,19 @@ def NearestNeighbor(g, v):
     vertex= minDist(g,length)
     unvisited.remove(vertex)
     path.append(vertex)
+    #path.append(startingNode) #you can also add here last node ( I dont know which solution is better )
+    print('initial path:', path)
     while len(unvisited) >0:
         rando=random.choice(unvisited)
+        print('random choice: ', rando)
         pos= buildPath(path,g,length, rando)
         unvisited.remove(rando)
         path.insert(pos,rando)
-    
-    path.append(startingNode)
+        print('current path: ', path)
+    path.append(startingNode) #you can also add here last node ( I dont know which solution is better )
+    print('final path: ',path)
     dist=buildDist(path,g,length)
+    print('dist: ',dist)
     end = time.time()
     time_cost =  end - start
     return dist, time_cost
@@ -164,9 +177,10 @@ data = [
 
 results = []
 
+'''
 for filepath, opt_solution in data:
     graph, vertex = Graph().buildGraph(open(filepath, "r"))
-    solution, time_cost= NearestNeighbor(graph, vertex)
+    solution, time_cost= RandomInsertion(graph, vertex)
     error = ((solution-opt_solution)/opt_solution)*100
 
     
@@ -176,3 +190,7 @@ for filepath, opt_solution in data:
     print("Optimal Solution: ", opt_solution)
     print("Execution Time: ","%.5f"%(time_cost))
     print("Error: ", "%.2f"%(error), "%\n")
+'''
+
+graph, vertex = Graph().buildGraph(open("tsp_dataset/burma14.tsp", "r"))
+solution, time_cost= RandomInsertion(graph, vertex)
