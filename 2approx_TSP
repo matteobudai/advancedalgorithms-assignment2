@@ -178,7 +178,6 @@ class MinHeap:
         return min
             
 def Prim (G: Graph, s: Node):
-    start=time.time()  
     for u in G.nodes.values():
         u.key= math.inf
     s.key = 0
@@ -196,7 +195,6 @@ def Prim (G: Graph, s: Node):
                 v[0].key = v[1]
                 Q.shiftUp(v[0].index)   
                 MST += v[0].key
-    end=time.time()
 
     return G
     #return MST
@@ -212,7 +210,7 @@ def preorder(G: Graph, s: Node, preorder_list: list):
     return preorder_list
 
 def approx_metric_tsp (G: Graph, s: Node):
-
+    start = time.time()
     MST = Prim(G, s)
     pre_order = preorder(MST, s, [])
     tsp_cycle = pre_order
@@ -227,7 +225,9 @@ def approx_metric_tsp (G: Graph, s: Node):
             tsp_cost += weight(tsp_cycle[0].weight_type, tsp_cycle[i].xcoord, tsp_cycle[j].xcoord, tsp_cycle[i].ycoord, tsp_cycle[j].ycoord)
             i += 1
             j += 1
-    return tsp_cost
+    end = time.time()
+    time_cost = (end - start)
+    return tsp_cost, time_cost
 
 data = [
     ["tsp_dataset/burma14.tsp", 3323],
@@ -245,21 +245,31 @@ data = [
     ["tsp_dataset/dsj1000.tsp", 18659688]
 ]
 
+results = []
+
 for filepath, opt_solution in data:
     
     startingNode = 1 # Root node tag
     new = Graph()
     new.buildGraph(open(filepath, "r"))
 
-    start = time.time()
-    solution = approx_metric_tsp(new, new.nodes.get(startingNode))
-    end = time.time()
-    time_cost = '%.2E' % (end - start)
+    solution, time_cost = approx_metric_tsp(new, new.nodes.get(startingNode))
+    error = ((solution-opt_solution)/opt_solution)*100
+
+    results.append(["2-Approx",filepath, solution, time_cost,error])
 
     print("File name: ", filepath) 
     print("My solution: ", solution)
     print("Optimal Solution: ", opt_solution)
-    print("Execution Time: ", time_cost, "\n")
+    print("Execution Time: ","%.5f"%(time_cost))
+    print("Error: ", "%.2f"%(error), "%\n")
+
+
+with open("tsp_dataset/results.txt", "w") as f:
+    for line in results:
+        f.write(str(line))
+        f.write('\n')
+
 
 
 
