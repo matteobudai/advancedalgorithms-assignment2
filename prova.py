@@ -80,7 +80,7 @@ def minDist(g, l):
             dist=g[i][2]
             vertex=g[i][1]
         i=i+1
-    return vertex
+    return vertex, dist
 
 def buildPath(p, g, l, k):
     dist= math.inf
@@ -113,7 +113,7 @@ def buildPath(p, g, l, k):
         i=i+1
     print('minimum:', dist)
     print('position to add: ', position)
-    return position
+    return position,dist
 
 def buildDist(p,g,l):
     i=0
@@ -139,25 +139,32 @@ def RandomInsertion(g, v):
     unvisited.remove(startingNode)
     path=[startingNode]
     length=len(v)
-    vertex= minDist(g,length)
+    vertex, d= minDist(g,length)
     unvisited.remove(vertex)
     path.append(vertex)
     #path.append(startingNode) #you can also add here last node ( I dont know which solution is better )
     print('initial path:', path)
+    print(d)
+    dist1=d
     while len(unvisited) >0:
         rando=random.choice(unvisited)
         print('random choice: ', rando)
-        pos= buildPath(path,g,length, rando)
+        pos, d1= buildPath(path,g,length, rando)
         unvisited.remove(rando)
+        dist1=dist1+d1
+        print('dist1',dist1)
         path.insert(pos,rando)
         print('current path: ', path)
     path.append(startingNode) #you can also add here last node ( I dont know which solution is better )
+    print(g[(path[length-1]-1)*(length-1)+path[length]-1])
+    dist1=dist1+g[(path[length-1]-1)*(length-1)+path[length]-1][2]
     print('final path: ',path)
+    print(dist1)
     dist=buildDist(path,g,length)
     print('dist: ',dist)
     end = time.time()
     time_cost =  end - start
-    return dist, time_cost
+    return dist1, time_cost
 
 data = [
     ["tsp_dataset/burma14.tsp", 3323],
