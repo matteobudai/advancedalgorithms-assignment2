@@ -1,11 +1,7 @@
 from cmath import inf
 import math
-import glob
 from collections import defaultdict
 import time
-from turtle import clear, update
-
-from pyparsing import PrecededBy
 
 #Create a node
 class Node:
@@ -197,24 +193,31 @@ def Prim (G: Graph, s: Node):
                 MST += v[0].key
 
     return G
-    #return MST
              
-def preorder(G: Graph, s: Node, preorder_list: list):
-
+def Preorder(G: Graph, s: Node, preorder_list: list):
+    #on the first call to Preorder, list preorder_list is null, and we add the starting node s
+    # after the first call we all add the node next visited in the depth first search of G 
     preorder_list.append(s)
 
     for u in G.nodes.values():
         if u.parent == s:
-            preorder(G, u,preorder_list)
+            Preorder(G, u,preorder_list)
 
     return preorder_list
 
-def approx_metric_tsp (G: Graph, s: Node):
+def approx_metric_tsp (G: Graph): 
     start = time.time()
+    #define the starting node of cycle/root node for MST
+    s = G.nodes.get(1)
+    #call prims to return the MST of graph G
     MST = Prim(G, s)
-    pre_order = preorder(MST, s, [])
+    #call preorder to return a list of the vertices in G visited in a depth first search approach
+    pre_order = Preorder(MST, s, [])
     tsp_cycle = pre_order
+    #add the starting node to the end of the list to complete the cycle
     tsp_cycle.append(s)
+
+    #calculate and sum the weights between each vertex in the cycle
     tsp_cost = 0
     i = 0
     j = 1
@@ -249,11 +252,10 @@ results = []
 
 for filepath, opt_solution in data:
     
-    startingNode = 1 # Root node tag
     new = Graph()
     new.buildGraph(open(filepath, "r"))
 
-    solution, time_cost = approx_metric_tsp(new, new.nodes.get(startingNode))
+    solution, time_cost = approx_metric_tsp(new) #, new.nodes.get(startingNode))
     error = ((solution-opt_solution)/opt_solution)*100
 
     results.append(["2-Approx",filepath, solution, time_cost,error])
