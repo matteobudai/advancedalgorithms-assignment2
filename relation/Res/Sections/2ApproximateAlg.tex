@@ -1,13 +1,39 @@
 \section{2-approximate Algorithm}\label{2-approximate}
+The 2-approximate algorithm starts by defining a starting node from the list of vertices within a graph, and then a minimum spanning tree is constructed using Prim's algorithm with the starting node as the root. The vertices of the MST are then visited in a preorder walk/depth first search, and added to a list in the order of which they are visited. Finally, the starting node is added at the end of the preorder list in order to complete the Hamiltonian cycle in the MST. 
 
+\begin{lstlisting}[mathescape=true]
+APPROX_METRIC_TSP (G)
+    V = { $v_1,v_2, ... ,v_n$ } 
+    r $\leftarrow v_1$
+    $T^* \leftarrow$ PRIM (G,r)
+    < $v_{i1},v_{i2}, ... ,v_{in} > = H^{ '} \leftarrow$ PREORDER ($T^{*}$, r) 
+    return < $H^{'}, v_{i1}$ > = H
+    
+\end{lstlisting}
 
-\subsection{Input and Data Structures}
+\subsection{Input and Data Structure}
+The 2-approximate algorithm requires a minimum spanning tree to be constructed using Prim's algorithm, and in order to be efficient, Prim's algorithm requires a heap data structure. We reused Prim's algorithm and the min heap data structure that were implemented in Assignment 1 for this course; however, the input files for Assignment 1 provided a list of connected nodes, whereas the input files for Assignment 2 only provide a list of distinct vertices and their x and y coordinates. Consequently, we made the following modifications to the Graph and Node classes, and added two new functions: 
+\begin{itemize}
+	\item  \textbf{Node}: three new instance variables are initialized:
+	    \begin{itemize}
+	    \item xcoord: x-coordinate of vertex
+	    \item ycoord: y-coordinate of vertex
+	    \item weighttype: weight type of the vertex, either Euclidean or Geographic
+	    \end{itemize}
+	\item  \textbf{Graph}: the buildGraph function restructures the input file to resemble the input file format of Assignment 1, before calling the createNodes and makeNodes functions. Specifically, the buildGraph function takes each vertex and connects it to all other vertices in the input file. 
+	\item  \textbf{Weight}: new function that takes the weight type, x-coordinate, and y-coordinate for two vertices as input, and returns the weight between the two vertices. For the Euclidean weight type, there is no coordinate conversion and we simply calculate the Euclidean distance rounded to the nearest integer. For the Geographic weight type, the x- and y-coordinates are converted to radians and then the geographic distance is calculated using the instructions in the FAQ site provided by the assignment.
+	\item  \textbf{Preorder}: new function that takes a MST graph, starting node, and empty set as input. The vertices of the MST are visited in a preorder walk/depth first search and added to the list in that order. The list is returned once all vertices of the MST have been visited and added to the list.   
+	
+\end{itemize}
 
 
 \subsection{Implementation}
-
-
-\subsection{Complexity}
-
-
+The solution to the cost of the Hamiltonian cycle in the MST is performed in the following steps:
+\begin{enumerate}
+    \item Create the Graph object through the Graph() class and call the buildGraph method
+    \item Calculate the MST of the graph using Prim's algorithm
+    \item Call the Preorder function, passing the inputs of the MST and the same starting node used as the root in Prim's algorithm.
+    \item Append the starting node to the end of the list returned by the Preorder function in order to complete the Hamiltonian cycle in the MST 
+    \item Call the Weight function to calculate the distance between each node in the Hamiltonian cycle, sum all of the edge weights to calculate the total cost of the cycle
+\end{enumerate}
 \pagebreak
