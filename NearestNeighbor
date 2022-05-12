@@ -50,7 +50,7 @@ class Graph:
     def weight(self, weight_type, x1, x2, y1, y2):
 
         if weight_type == 'EUC_2D':
-           weight = int(math.sqrt((x2 - x1) **2 + (y2 - y1) **2)) 
+           weight = int(round(math.sqrt((x2 - x1) **2 + (y2 - y1) **2))) 
         elif weight_type == 'GEO':
             PI = 3.141592
             RRR = 6378.388
@@ -119,10 +119,14 @@ data = [
     ["tsp_dataset/dsj1000.tsp", 18659688]
 ]
 
+results = []
+
 for filepath, opt_solution in data:
     graph, vertex = Graph().buildGraph(open(filepath, "r"))
     solution, time_cost= NearestNeighbor(graph, vertex)
     error = ((solution-opt_solution)/opt_solution)*100
+
+    results.append(["Nearest Neighbor",filepath, solution, time_cost,error])
 
     print("File name: ", filepath) 
     print("My solution: ", solution)
@@ -130,4 +134,7 @@ for filepath, opt_solution in data:
     print("Execution Time: ","%.5f"%(time_cost))
     print("Error: ", "%.2f"%(error), "%\n")
 
-
+with open("tsp_dataset/results.txt", "a") as f:
+    for line in results:
+        f.write(str(line))
+        f.write('\n')
