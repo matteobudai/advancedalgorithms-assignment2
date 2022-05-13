@@ -1,10 +1,17 @@
 \section{Conclusion}\label{conclusion}
-From the Error Comparison graph and Results table, we can observe that for instances with less than 50 coordinates the approximation error is below or just at 50\% for all three algorithms. However, as the number of coordinates grow past 50, the approximation error of the random insertion algorithm continues to grow past 100\%, while the approximation error of the 2-approximate and nearest neighbor algorithms remain at or below 50\%. From the Time Comparison graph and Results table, we can observe that for instances less than 442 coordinates, all three algorithms have an execution time below 1 second, although there is a clear distinction with the random insertion algorithm time increasing more quickly than the nearest neighbor and 2-approximate algorithms. After 442 coordinates, the random insertion algorithm time grows rapidly, taking over a minute for the largest instance with 1000 coordinates, where the nearest neighbor and 2-approximate algorithms always remain below half a second. 
-\linebreak
 
-With respect to the approximation error, the nearest neighbor algorithm does better for all but three of the instances. Interestingly, the three instances for which nearest neighbor is outperformed on are the three lowest coordinate instances. For the three lowest coordinate instances, the 2 approximate algorithm outperforms the other two. 
-\linebreak
-
-Considering both the approximation error and the execution time, we observe that the nearest neighbor algorithm is the most efficient. 
+ From the Error Comparison graph and Results table, we initially observe for the instances less than 50 coordinates the approximation error of nearest neighbor grows rapidly as compared to random insertion and 2-approximate. However, as the number of coordinates grows past 50, nearest neighbor outperforms 2-approximate, and eventually each algorithm has a steady approximation error. 2-approximate hovers around 40\%, nearest neighbor around 20\%, and random insertion around 10\%. 
+ 
+ \linebreak
+ 
+ \noindent From the Time Comparison graph and Results table, we can observe that for instances less than 493 coordinates, all three algorithms have similar execution times. At 1000 coordinates, the execution times of nearest neighbor and 2 approximate algorithms increase to around 30 seconds, while the random insertion algorithm only increases to 15 seconds. 
+ 
+ \linebreak
+ 
+ \noindent With respect to the approximation error, the random insertion algorithm overwhelmingly out-performs nearest neighbor and 2-approximate.
+ 
+ \linebreak
+ 
+\noindent Considering both the approximation error and the execution time, we observe that the random insertion algorithm is the most efficient. 
 
 \pagebreak
