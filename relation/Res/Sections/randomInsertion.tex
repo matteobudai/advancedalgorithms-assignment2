@@ -1,13 +1,30 @@
 \section{Random Insertion Algortihm}\label{randominsertion}
-
+Idea of the algorithm is to take randomly a node and find the cheapest path going through that random k from pair of nodes in our partial circuit. 
 
 \subsection{Input and Data Structures}
-
+As it was mentiond erlier, the graph initialization functions create graph as a list of edges and also provide us a list of all nodes.
 
 \subsection{Implementation}
+The Implementation of the code follow the based concept:
 
+\begin{itemized}
+    \item \textbf{Initialization}: Take first node (we always took first node from the graph and make it as partial circuit
+    \item \textbf{Selection}: Random select node not in partial circuit
+    \item \textbf{Insertion}: Find edge in partial circuit that minimize the triangle inequality: w(i,k)+w(k,j)−w(i,j) and insert k between i and j
+    \item \textbf{Repeat}: step \textbf{Selection} and \textbf{Insertion} until add all nodes to partial circuit
+\end{itemized}
 
+We implement 3 functions: 
+\textbf{RandomInsertion}: Main function that call other in process of counting the triangle inequality and check the distance.
+\textbf{buildPath}: Function to get the distance required to get to random k and also position after we need to insert. 
+\textbf{minDist}: Function to get closest node to input one.
+
+First run RandomInsertion which add first nodes to the partial circuit (we pick second node using minDist) and then in while cycle we take random node not from partial circuit and check where we can insert it in order to keep triangle inequality minimal.
+
+Originality, that I we found pretty usefull in minDist function is to run in clice of data instead of all graph.
 \subsection{Complexity}
+
+As it was expected Complexity was pretty fine and close to n*log(n).
 
 
 \pagebreak

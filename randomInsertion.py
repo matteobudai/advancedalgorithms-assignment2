@@ -71,21 +71,33 @@ class Graph:
 
         return weight
 
-def minDist(g, l):
-    dist= math.inf
-    vertex=None
-    i=0
-    while(i<(l-1)):
-        if g[i][2]<dist:
-            dist=g[i][2]
-            vertex=g[i][1]
-        i=i+1
-    return vertex, dist
+# Function to get closest node to input one
+# Input: graph, node, length
+# Ouput: closest node, weight of edge 
+def minDist(g, u, l):
+    min_ = math.inf
+    for i in graph[(u-1)*(l-1):u*(l-1)]:
+            # iI weight is lower
+            if i[2] <= min_:
+                # Save lowest weight
+                min_ = i[2]
+                # Save node connected by lowest cost edge
+                new_node = i[1]
+    return new_node, min_
+
+# Function to get the distance required to get to random k and also position after we need to insert 
+# Input: partial circuit, graph, length, random variable k
+# Otput: position and weight
 
 def buildPath(p, g, l, k):
     dist= math.inf
     i=0
     j=1
+    # s = w(i, k)
+    # h = w(k, j)
+    # z = w(i, j)
+
+    # check all possible place to insert
     while(i<len(p)-1):  
         if(k<p[i]):
             s=g[(p[i]-1)*(l-1)+k-1]
@@ -101,6 +113,7 @@ def buildPath(p, g, l, k):
             z=g[(p[i]-1)*(l-1)+p[j]-2]
         else:
             z=g[(p[i]-1)*(l-1)+p[j]-1]
+        # Update minimum value
         if s[2]+h[2]-z[2]<dist:
             dist=s[2]+h[2]-z[2]
             position=i+1
@@ -108,27 +121,46 @@ def buildPath(p, g, l, k):
         i=i+1
     return position,dist
 
-
+# Function for Random Insertion algorithm 
+# Input: Graph and the vertexes
+# Output: Weight of all path and time of algorithm ran
 def RandomInsertion(g, v):
+    # Start time point
     start= time.time()
+    # Create a list of all nodes, which will be used as visited list
     unvisited = copy.deepcopy(v)
+    # Add first node to the final path and remove it from the unvisited list
     startingNode=unvisited[0]
     unvisited.remove(startingNode)
     path=[startingNode]
+    # Take the length of the vertexes
     length=len(v)
-    vertex, d= minDist(g,length)
+    # Find closest (by weight) vertex to the first and also it weight 
+    vertex, d= minDist(g,startingNode,length)
+    # Remove closes node from unvisited list and add it to the path
     unvisited.remove(vertex)
     path.append(vertex)
+    # Add starting node to the end because it should be a circle list
     path.append(startingNode)
+    # Add first distance
     dist=d+d
+    # While we have unvisited nodes do
     while len(unvisited) >0:
+        # Take random node from the graph (=k)
         rando=random.choice(unvisited)
+        # Call the build function to get position of the insert k to the partial circuit and also weight of it
         pos, d= buildPath(path,g,length, rando)
+        # Remove random variable k from the unvisited list
         unvisited.remove(rando)
-        dist=dist+d       
+        # Update weight
+        dist=dist+d      
+        # Inptu k to the path
         path.insert(pos,rando)
+    # End of time  point
     end = time.time()
+    # Count time of running 
     time_cost =  end - start
+    # Return distance and time required 
     return dist, time_cost
 
 data = [
