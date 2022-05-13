@@ -1,5 +1,4 @@
 import math
-import glob
 import copy
 from tracemalloc import start
 import time
@@ -72,127 +71,65 @@ class Graph:
 
         return weight
 
-def minDist(p, g, l):
+def minDist(g, l):
     dist= math.inf
-    node= p[-1]
     vertex=None
-    i=(l-1)*(node-1)
-    while(i<(l-1)*node):
-        if g[i][2]<dist and g[i][1] not in p:
+    i=0
+    while(i<(l-1)):
+        if g[i][2]<dist:
             dist=g[i][2]
             vertex=g[i][1]
         i=i+1
-    return dist,vertex
+    return vertex, dist
 
-# Function to get dist distance:
-# Input: Graph, node from, node to
-# Output: Weight
-def u_v_dist(graph, u, v, vertex):
-    length = len(vertex)
-    w = 0
-    for i in graph[(u-1)*(length-1):u*(length-1)]:
-        if i[1] == v:
-            w = i[2]
-    return w
-
-# Function to return node connected by lowest cost edge
-# Input: Graph and node from
-# Output: Node connected by lowest edge
-def u_low_dist(graph, u , vertex):
-    length = len(vertex)
-    new_node = 0
-    
-    min_ = math.inf
-    for i in graph[(u-1)*(length-1):u*(length-1)]:
-            # iI weight is lower
-            if i[2] <= min_:
-                # Save lowest weight
-                min_ = i[2]
-                # Save node connected by lowest cost edge
-                new_node = i[1]
-    return new_node
-
-# Function to apply Random Insertion algorithm
-# Input: Graph, vertices
-# Output: Sum of weights, Timer 
-
-
-def random_insertion(graph, vertex):
-    # Start time point
-    Tik = time.time()
-
-    #append starting node to TSP cycle and remove from unvisited nodes
-    TSP_nodes = []
-    starting_node = vertex[0]
-    TSP_nodes.append(starting_node)
-
-    unvisited_nodes = copy.deepcopy(vertex)
-    unvisited_nodes.remove(starting_node)
-
-    first_node = u_low_dist(graph, starting_node, vertex)
-    TSP_nodes.append(first_node)
-    unvisited_nodes.remove(first_node)
-
-    #choose a random node
-    #since this is only the second node, we will always insert between the 0 and 1 node
-    #no need to check for triangle inequality at this stage
-    second_node = random.choice(unvisited_nodes)
-    TSP_nodes.insert(1, second_node)
-    unvisited_nodes.remove(second_node)
-
-    length = len(vertex)
-    #begin checking for triangle in-equality and inserting random nodes
-    while len(unvisited_nodes) > 0:
-
-        
-        #choose a random node, k, that has not been visited
-        random_k = random.choice(unvisited_nodes)
-
-        weight_check = []
-        #for each node in the existing TSP cycle, add it's edge weight and node id to the weight_check list
-        for node in TSP_nodes:
-            for node_k in graph[(node-1)*(length-1):node*(length-1)]:
-                if node_k[0] == node and node_k[1] == random_k:
-                    weight_check.append([node_k[2],node_k[0]])
-        #sort the list and take the 0 and 1 position (node i and j respectively)
-        #this will ensure we insert the random node k between the two existing nodes i & j in the existing TSP cycle
-        #which will minimize w(i, k) + w(k, j) − w(i, j) 
-        weight_check.sort()
-        i = weight_check[0][1]
-        j = weight_check[1][1]
-        index_to_insert = min(TSP_nodes.index(i)+1,TSP_nodes.index(j)+1)
-        TSP_nodes.insert(index_to_insert,random_k)
-
-    
-        unvisited_nodes.remove(random_k)
-
-    #once all nodes have been visited and added to the TSP cycle, add the starting node at the node to complete Hamiltonian cycle
-    TSP_nodes.append(starting_node)
-
-    #calculate the weight of the Hamiltonian cycle
-    tsp_cost = 0
-    i = 0
-    j = 1
-    for u in TSP_nodes:
-        if TSP_nodes[i] == starting_node and i > 0: #do nothing, at the end of the cycle
-            1
+def buildPath(p, g, l, k):
+    dist= math.inf
+    i=0
+    j=1
+    while(i<len(p)-1):  
+        if(k<p[i]):
+            s=g[(p[i]-1)*(l-1)+k-1]
         else:
-            for nodes in range(0,len(graph)):
-                if graph[nodes][0] == TSP_nodes[i] and graph[nodes][1] == TSP_nodes[j]:
-                    tsp_cost += graph[nodes][2]
-            i += 1
-            j += 1
+            s=g[(p[i]-1)*(l-1)+k-2]
+        
+        if(k<p[j]):
+            h=g[(k-1)*(l-1)+(p[j])-2]
+        else:
+            h=g[(k-1)*(l-1)+(p[j])-1]
 
-    #print(tsp_cost)
+        if(p[i]<p[j]):
+            z=g[(p[i]-1)*(l-1)+p[j]-2]
+        else:
+            z=g[(p[i]-1)*(l-1)+p[j]-1]
+        if s[2]+h[2]-z[2]<dist:
+            dist=s[2]+h[2]-z[2]
+            position=i+1
+        j=j+1
+        i=i+1
+    return position,dist
 
-     # End time point
-    Toc = time.time()
-    # Time of Execution 
-    timer = Toc - Tik
-    
-    #print("Path: ", TSP_nodes)
-    return tsp_cost, timer 
 
+def RandomInsertion(g, v):
+    start= time.time()
+    unvisited = copy.deepcopy(v)
+    startingNode=unvisited[0]
+    unvisited.remove(startingNode)
+    path=[startingNode]
+    length=len(v)
+    vertex, d= minDist(g,length)
+    unvisited.remove(vertex)
+    path.append(vertex)
+    path.append(startingNode)
+    dist=d+d
+    while len(unvisited) >0:
+        rando=random.choice(unvisited)
+        pos, d= buildPath(path,g,length, rando)
+        unvisited.remove(rando)
+        dist=dist+d       
+        path.insert(pos,rando)
+    end = time.time()
+    time_cost =  end - start
+    return dist, time_cost
 
 data = [
     ["tsp_dataset/burma14.tsp", 3323],
@@ -212,17 +149,14 @@ data = [
 
 results = []
 
+
 for filepath, opt_solution in data:
     graph, vertex = Graph().buildGraph(open(filepath, "r"))
-    length = len(vertex)
-    
-    #solution, time_cost = random_init(graph, vertex)
-    solution, time_cost = random_insertion(graph, vertex)
+    solution, time_cost= RandomInsertion(graph, vertex)
     error = ((solution-opt_solution)/opt_solution)*100
 
     results.append(["Random Insertion",filepath, solution, time_cost,error])
 
-    #print("length", length)
     print("File name: ", filepath) 
     print("My solution: ", solution)
     print("Optimal Solution: ", opt_solution)
@@ -233,3 +167,4 @@ with open("tsp_dataset/results.txt", "a") as f:
     for line in results:
         f.write(str(line))
         f.write('\n')
+
