@@ -72,7 +72,7 @@ class Graph:
         return weight
 
 # Function to get closest node to input one
-# Input: graph, node, length
+# Input: node
 # Ouput: closest node, weight of edge 
 def minDist(u):
     # Take the length of the vertexes
@@ -88,7 +88,7 @@ def minDist(u):
     return new_node, min_
 
 # Function to get the distance required to get to random k and also position after we need to insert 
-# Input: partial circuit, graph, length, random variable k
+# Input: partial circuit, random variable k
 # Otput: position and weight
 
 def buildPath(p, k):
@@ -125,7 +125,6 @@ def buildPath(p, k):
     return position,dist
 
 # Function for Random Insertion algorithm 
-# Input: Graph and the vertexes
 # Output: Weight of all path and time of algorithm ran
 def RandomInsertion():
     # Start time point

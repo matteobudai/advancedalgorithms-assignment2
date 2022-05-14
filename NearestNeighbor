@@ -70,37 +70,66 @@ class Graph:
 
         return weight
 
+# Function to get the nearest neighbor
+# Input: path
+# Ouput: nearest neighbor node, weight of edge 
 def minDist(p):
+    # Initially setup of the weight 
     dist= math.inf
+    # Take the last node of the path
     node= p[-1]
+    # Take the length of the vertexes
     l=len(vertex)
+    # set the node to None
     vertexF=None
+    #set the index where start to find the nearest neighbor
     i=(l-1)*(node-1)
+    # While we have visited all neighbors of node
     while(i<(l-1)*node):
+        # if the weigh is lower and the node is not in the path
         if graph[i][2]<dist and graph[i][1] not in p:
+            # Save lowest weight
             dist=graph[i][2]
+            # Save node connected by lowest cost edge
             vertexF=graph[i][1]
         i=i+1
     return dist,vertexF
 
 
-
+# Function for Nearest Neighbor algorithm 
+# Output: Weight of all path and time of algorithm ran
 def NearestNeighbor():
+     # Start time point
     start= time.time()
+    # Create a list of all nodes, which will be used as visited list
     unvisited = copy.deepcopy(vertex)
+    # Add first node to the final path and remove it from the unvisited list
     startingNode=unvisited[0]
+    # Remove the starting Node from the unvisited
     unvisited.remove(startingNode)
+    # Create the initially path
     path=[startingNode]
+    # counter of the weight of the path
     dist=0
+    # While we have unvisited nodes do
     while len(unvisited) >0:
+        #call the minDist function to get the neirest neighbor node and its weight
         d, vertexF= minDist(path)
+        # remove from the unvisited the node found
         unvisited.remove(vertexF)
+        # add to the path the new node
         path.append(vertexF)
+        # Updatge the total weight
         dist=dist+d
+    # update the weight with the distance between the starting node and the last of the path
     dist=dist+graph[path[-1]-2][2]
+    # # Add starting node to the end because it should be a hamiltonian circuit
     path.append(startingNode)
+    # End time point
     end = time.time()
+    # Count time of running 
     time_cost =  end - start
+    # Return distance and time required 
     return dist, time_cost
 
 data = [
