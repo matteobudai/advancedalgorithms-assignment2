@@ -74,7 +74,9 @@ class Graph:
 # Function to get closest node to input one
 # Input: graph, node, length
 # Ouput: closest node, weight of edge 
-def minDist(g, u, l):
+def minDist(u):
+    # Take the length of the vertexes
+    l=len(vertex)
     min_ = math.inf
     for i in graph[(u-1)*(l-1):u*(l-1)]:
             # iI weight is lower
@@ -89,14 +91,15 @@ def minDist(g, u, l):
 # Input: partial circuit, graph, length, random variable k
 # Otput: position and weight
 
-def buildPath(p, g, l, k):
+def buildPath(p, k):
     dist= math.inf
     i=0
     j=1
     # s = w(i, k)
     # h = w(k, j)
     # z = w(i, j)
-
+    l=len(vertex)
+    g=graph
     # check all possible place to insert
     while(i<len(p)-1):  
         if(k<p[i]):
@@ -124,19 +127,17 @@ def buildPath(p, g, l, k):
 # Function for Random Insertion algorithm 
 # Input: Graph and the vertexes
 # Output: Weight of all path and time of algorithm ran
-def RandomInsertion(g, v):
+def RandomInsertion():
     # Start time point
     start= time.time()
     # Create a list of all nodes, which will be used as visited list
-    unvisited = copy.deepcopy(v)
+    unvisited = copy.deepcopy(vertex)
     # Add first node to the final path and remove it from the unvisited list
     startingNode=unvisited[0]
     unvisited.remove(startingNode)
     path=[startingNode]
-    # Take the length of the vertexes
-    length=len(v)
     # Find closest (by weight) vertex to the first and also it weight 
-    vertex, d= minDist(g,startingNode,length)
+    vertex, d= minDist(startingNode)
     # Remove closes node from unvisited list and add it to the path
     unvisited.remove(vertex)
     path.append(vertex)
@@ -149,7 +150,7 @@ def RandomInsertion(g, v):
         # Take random node from the graph (=k)
         rando=random.choice(unvisited)
         # Call the build function to get position of the insert k to the partial circuit and also weight of it
-        pos, d= buildPath(path,g,length, rando)
+        pos, d= buildPath(path, rando)
         # Remove random variable k from the unvisited list
         unvisited.remove(rando)
         # Update weight
@@ -184,7 +185,7 @@ results = []
 
 for filepath, opt_solution in data:
     graph, vertex = Graph().buildGraph(open(filepath, "r"))
-    solution, time_cost= RandomInsertion(graph, vertex)
+    solution, time_cost= RandomInsertion()
     error = ((solution-opt_solution)/opt_solution)*100
 
     results.append(["Random Insertion",filepath, solution, time_cost,error])

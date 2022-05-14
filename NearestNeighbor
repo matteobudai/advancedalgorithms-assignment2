@@ -70,34 +70,34 @@ class Graph:
 
         return weight
 
-def minDist(p, g, l):
+def minDist(p):
     dist= math.inf
     node= p[-1]
-    vertex=None
+    l=len(vertex)
+    vertexF=None
     i=(l-1)*(node-1)
     while(i<(l-1)*node):
-        if g[i][2]<dist and g[i][1] not in p:
-            dist=g[i][2]
-            vertex=g[i][1]
+        if graph[i][2]<dist and graph[i][1] not in p:
+            dist=graph[i][2]
+            vertexF=graph[i][1]
         i=i+1
-    return dist,vertex
+    return dist,vertexF
 
 
 
-def NearestNeighbor(g, v):
+def NearestNeighbor():
     start= time.time()
-    unvisited = copy.deepcopy(v)
+    unvisited = copy.deepcopy(vertex)
     startingNode=unvisited[0]
     unvisited.remove(startingNode)
     path=[startingNode]
     dist=0
-    length=len(v)
     while len(unvisited) >0:
-        d, vertex= minDist(path,g,length)
-        unvisited.remove(vertex)
-        path.append(vertex)
+        d, vertexF= minDist(path)
+        unvisited.remove(vertexF)
+        path.append(vertexF)
         dist=dist+d
-    dist=dist+g[path[-1]-2][2]
+    dist=dist+graph[path[-1]-2][2]
     path.append(startingNode)
     end = time.time()
     time_cost =  end - start
@@ -123,7 +123,7 @@ results = []
 
 for filepath, opt_solution in data:
     graph, vertex = Graph().buildGraph(open(filepath, "r"))
-    solution, time_cost= NearestNeighbor(graph, vertex)
+    solution, time_cost= NearestNeighbor()
     error = ((solution-opt_solution)/opt_solution)*100
 
     results.append(["Nearest Neighbor",filepath, solution, time_cost,error])
