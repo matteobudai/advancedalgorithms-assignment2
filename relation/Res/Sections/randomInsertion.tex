@@ -26,9 +26,28 @@ The final solution is the following:
 	\item We start the time;
 	\item We execute a deep copy unvisited of the original list v;
 	\item We follow the algorithm and we start from the node 0 \textit{(startingNode)} of the unvisited list;
+	\item We remove the starting node from the unvisited list and we add always the starting node in our path \textit{(is a list)};
+	\item We found the vertex j that minimize w(0,j) with the function \textit{minDist} and we remove it from the unvisited list and add it to the path;
+	\item We add starting node to the end because it should be a circle list;
+	\item We initialize our solution \textit{(dist)} to the distance found with the function \textit{minDist} counted twice and we start our cycle until we have visited all vertices \textit{(len(unvisited)>0))};
+	\item In the while cycle:
+	\begin{enumerate}
+		\item We take the random node from the unvisited list;
+		\item We call the function \textit{buildPath}:
+		\begin{itemize}
+			\item  It initalize the distance to infinite;
+			\item  In the cycle it checks for all elements of our path what is the position where the random node k minimize the total weight \textit{"min(w(i,k)+w(k,j)-w(i,j))"};
+			\item It returns the position where we have to insert the node and the distance required to add the random node.
+		\end{itemize}
+		\item We remove the random node from the unvisited list and we add it in the path;
+		\item We update the distance and we add the random node in the correct position. 
+	\end{enumerate}
+	\item When we finish the while cycle we end the time and we calculate the time cost;
+	\item We return the solution and the time.\\
 \end{itemize}
 
-Originality, that we found pretty usefull in minDist function is to run in cicle of data instead of all graph.
+
+Regarding originality, we implemented a method in the minDist function that runs through a slice of the graph rather than through the entire graph, which ultimately makes the function more efficient.
 
 
 
