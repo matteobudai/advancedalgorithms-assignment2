@@ -1,18 +1,18 @@
 \section{Random Insertion Algorithm}\label{randominsertion}
-Idea of the algorithm is to take randomly a node and find the cheapest path going through that random k from pair of nodes in our partial circuit. 
+The idea of the random insertion algorithm is to randomly select a node and find the cheapest path going through that random k node from pair of nodes in our partial circuit. 
 As it was mentiond erlier, the graph initialization functions create graph as a list of edges and also provide us a list of all nodes.
 The Implementation of the code follow the based concept:
 
 \begin{itemize}
-    \item \textbf{Initialization}: Take first node (we always took first node from the graph and make it as partial circuit;
+    \item \textbf{Initialization}: Take first node (we always took first node from the graph) and make it as partial circuit;
     \item \textbf{Selection}: Random select node not in partial circuit;
-    \item \textbf{Insertion}: Find edge in partial circuit that minimize the triangle inequality: w(i,k)+w(k,j)-w(i,j) and insert k between i and j;
+    \item \textbf{Insertion}: Find edge in partial circuit that minimizes the triangle inequality: w(i,k)+w(k,j)-w(i,j) and insert k between i and j;
     \item \textbf{Repeat}: step \textbf{Selection} and \textbf{Insertion} until add all nodes to partial circuit.
 \end{itemize}
 
 
 \subsection{Functions}
-We implement 3 functions: 
+We implemented 3 functions: 
 
 \begin{itemize}
 	\item \textbf{RandomInsertion()}: Main function that call other in process of counting the triangle inequality and check the distance.
