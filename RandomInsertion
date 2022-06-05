@@ -1,0 +1,300 @@
+import math
+import glob
+import copy
+from tracemalloc import start
+import time
+import random
+
+#Transform coordinate data into connected graph (list in format [u, v, weight])
+class Graph:
+
+    def buildGraph(self, input):
+        lines = input.readlines()
+
+        #determine what line the coordinate data starts and ends on (some files have extra blank lines at the end)
+        #node_data_start = 0
+        node_data_end = 0
+        while lines[node_data_end].split()[0] != 'EOF':
+            if lines[node_data_end].split()[0] == 'NODE_COORD_SECTION':
+                node_data_start = node_data_end
+            node_data_end += 1
+
+        #determine weight type (always on line 4)
+        line_4 = lines[4].split()
+        weight_type = line_4[len(line_4)-1]
+        connected_graph = []
+        vertex= []
+        
+        
+        #create a connected graph by looping through each node and connecting it to all other nodes
+        #calculate the weight between each node depending on the weight_type defined in the graph
+        for iterate in range(node_data_start+1, node_data_end):
+            
+            node_u = int(lines[iterate].split()[0])
+            u_x1_coord = float(lines[iterate].split()[1])
+            u_y1_coord = float(lines[iterate].split()[2])
+            vertex.append(node_u)
+
+            for interate_v in range(node_data_start+1, node_data_end):
+                node_v = int(lines[interate_v].split()[0])
+                if node_u == node_v: #do nothing
+                    1
+                elif node_u != node_v: 
+                    #node_v = int(lines[interate_v].split()[0])
+                    v_x2_coord = float(lines[interate_v].split()[1])
+                    v_y2_coord = float(lines[interate_v].split()[2])
+                    weight_uv = self.weight(weight_type, u_x1_coord, v_x2_coord, u_y1_coord, v_y2_coord)
+                    connected_graph.append([node_u,node_v,weight_uv])
+            
+        return(connected_graph, vertex)
+
+
+    def weight(self, weight_type, x1, x2, y1, y2):
+
+        if weight_type == 'EUC_2D':
+           weight = int(math.sqrt((x2 - x1) **2 + (y2 - y1) **2)) 
+        elif weight_type == 'GEO':
+            PI = 3.141592
+            RRR = 6378.388
+            # x = latitude
+            # y = longitude
+
+            new_x1 = PI * (int(x1) + 5.0 *  (x1 - int(x1)) / 3.0) / 180.0
+            new_x2 = PI * (int(x2) + 5.0 *  (x2 - int(x2)) / 3.0) / 180.0
+            new_y1 = PI * (int(y1) + 5.0 *  (y1 - int(y1)) / 3.0) / 180.0
+            new_y2 = PI * (int(y2) + 5.0 *  (y2 - int(y2)) / 3.0) / 180.0
+
+            q1 = math.cos( new_y1 - new_y2 ); 
+            q2 = math.cos( new_x1 - new_x2 ); 
+            q3 = math.cos( new_x1 + new_x2 ); 
+
+            weight = int ( RRR * math.acos( 0.5*((1.0+q1)*q2 - (1.0-q1)*q3) ) + 1.0)
+
+        return weight
+
+def minDist(p, g, l):
+    dist= math.inf
+    node= p[-1]
+    vertex=None
+    i=(l-1)*(node-1)
+    while(i<(l-1)*node):
+        if g[i][2]<dist and g[i][1] not in p:
+            dist=g[i][2]
+            vertex=g[i][1]
+        i=i+1
+    return dist,vertex
+
+# Function to get dist distance:
+# Input: Graph, node from, node to
+# Output: Weight
+def u_v_dist(graph, u, v, vertex):
+    length = len(vertex)
+    w = 0
+    for i in graph[(u-1)*(length-1):u*(length-1)]:
+        if i[1] == v:
+            w = i[2]
+    return w
+
+# Function to return node connected by lowest cost edge
+# Input: Graph and node from
+# Output: Node connected by lowest edge
+def u_low_dist(graph, u , vertex):
+    length = len(vertex)
+    new_node = 0
+    
+    min_ = math.inf
+    for i in graph[(u-1)*(length-1):u*(length-1)]:
+            # iI weight is lower
+            if i[2] <= min_:
+                # Save lowest weight
+                min_ = i[2]
+                # Save node connected by lowest cost edge
+                new_node = i[1]
+    return new_node
+
+# Function to apply Random Insertion algorithm
+# Input: Graph, vertices
+# Output: Sum of weights, Timer 
+
+def random_init(graph, vertex):
+    # Start time point
+    Tik = time.time()
+
+
+    # Variable of length of vertex
+    length = len(vertex)
+    # List to keep partial circuit
+    path = []
+    # List to keep unvisited nodes (copy of whole nodes)
+    unvisitied = copy.deepcopy(vertex)
+
+    
+    # Add first node to path from unvisited list 
+    path.append(unvisitied[0])
+    # Remove first node from unvisited list 
+    unvisitied.remove(path[0])
+
+    # Variable of lowest cost node to fisrt
+    j = u_low_dist(graph, path[0], vertex)
+            
+    # Update path
+    path.append(j)
+    # Remove J from unvisited list
+    unvisitied.remove(j)
+
+    # While there are unvisited nodes
+    while len(unvisitied) > 0:
+        # Initital minimum to + inf
+        min_ = math.inf
+        # Temporary variable to keep node with lowest cost edge 
+        flag = 0
+        
+        # Take random node from unvisited list
+        k = random.choice(unvisitied)
+        
+        # Cycle through all partial circuit
+        for i in path:
+            # Check all nodes except last one
+            if i != j:
+                # Variable to keep result of triangle equations
+                triangle = u_v_dist(graph, i, k, vertex) + u_v_dist(graph, k, j, vertex) - u_v_dist(graph, i, j, vertex)
+                # If result of triangle equation lower than min
+                if triangle < min_:
+                    # Keep new min
+                    min_ = triangle
+                    # Keep the node that goes before k
+                    flag = i
+                
+            
+        # Add k node after i from cycle (flag)
+        path.insert( path.index(flag) + 1, k)
+        # Remove k from unvisited list
+        unvisitied.remove(k)
+
+    # Variable to keep distance between nodes
+    dist = 0
+    # Cycle for weight
+    # From 0 to len - 1 
+    # Get result of sum of weights of nodes with index_i and index_i_+_1
+    for i in range(len(path) - 1):
+        dist += u_v_dist( graph, path[i], path[i+1] )
+    
+    # End time point
+    Toc = time.time()
+    # Time of Execution 
+    timer = Toc - Tik
+    
+    print("Path: ", path)
+    return  dist, timer 
+
+
+def random_insertion_jamie(graph, vertex):
+    # Start time point
+    Tik = time.time()
+
+    #append starting node to TSP cycle and remove from unvisited nodes
+    TSP_nodes = []
+    starting_node = vertex[0]
+    TSP_nodes.append(starting_node)
+
+    unvisited_nodes = copy.deepcopy(vertex)
+    unvisited_nodes.remove(starting_node)
+
+    first_node = u_low_dist(graph, starting_node, vertex)
+    TSP_nodes.append(first_node)
+    unvisited_nodes.remove(first_node)
+
+    #choose a random node
+    #since this is only the second node, we will always insert between the 0 and 1 node
+    #no need to check for triangle inequality at this stage
+    second_node = random.choice(unvisited_nodes)
+    TSP_nodes.insert(1, second_node)
+    unvisited_nodes.remove(second_node)
+
+    length = len(vertex)
+    #begin checking for triangle in-equality and inserting random nodes
+    while len(unvisited_nodes) > 0:
+
+        
+        #choose a random node, k, that has node been visited
+        random_k = random.choice(unvisited_nodes)
+
+        
+        
+        weight_check = []
+        #for each node in the existing TSP cycle, add it's edge weight and node id to the weight_check list
+        for node in TSP_nodes:
+            for node_k in graph[(node-1)*(length-1):node*(length-1)]:
+                if node_k[0] == node and node_k[1] == random_k:
+                    weight_check.append([node_k[2],node_k[0]])
+        #sort the list and take the 0 and 1 position (node i and j respectively)
+        #this will ensure we insert the random node k between the two existing nodes i & j in the existing TSP cycle
+        #which will minimize w(i, k) + w(k, j) − w(i, j) 
+        weight_check.sort()
+        i = weight_check[0][1]
+        j = weight_check[1][1]
+        index_to_insert = min(TSP_nodes.index(i)+1,TSP_nodes.index(j)+1)
+        TSP_nodes.insert(index_to_insert,random_k)
+
+    
+        unvisited_nodes.remove(random_k)
+
+    #once all nodes have been visited and added to the TSP cycle, add the starting node at the node to complete Hamiltonian cycle
+    TSP_nodes.append(starting_node)
+
+    #calculate the weight of the Hamiltonian cycle
+    tsp_cost = 0
+    i = 0
+    j = 1
+    for u in TSP_nodes:
+        if TSP_nodes[i] == starting_node and i > 0: #do nothing, at the end of the cycle
+            1
+        else:
+            for nodes in range(0,len(graph)):
+                if graph[nodes][0] == TSP_nodes[i] and graph[nodes][1] == TSP_nodes[j]:
+                    tsp_cost += graph[nodes][2]
+            i += 1
+            j += 1
+
+    #print(tsp_cost)
+
+     # End time point
+    Toc = time.time()
+    # Time of Execution 
+    timer = Toc - Tik
+    
+    print("Path: ", TSP_nodes)
+    return tsp_cost, timer 
+
+
+
+data = [
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/burma14.tsp", 3323],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/ulysses16.tsp", 6859],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/ulysses22.tsp", 7013],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/eil51.tsp", 426],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/berlin52.tsp", 7542],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/kroD100.tsp", 21294],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/kroA100.tsp", 21282],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/ch150.tsp", 6528],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/gr202.tsp", 40160],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/gr229.tsp", 134602],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/pcb442.tsp", 50778],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/d493.tsp", 35002],
+    ["/Users/sanjartlepin/Downloads/AA/tsp_dataset/dsj1000.tsp", 18659688]
+]
+
+for filepath, opt_solution in data:
+    graph, vertex = Graph().buildGraph(open(filepath, "r"))
+    length = len(vertex)
+    
+    #solution, time_cost = random_init(graph, vertex)
+    solution, time_cost = random_insertion_jamie(graph, vertex)
+    error = ((solution-opt_solution)/opt_solution)*100
+
+    #print("length", length)
+    print("File name: ", filepath) 
+    print("My solution: ", solution)
+    print("Optimal Solution: ", opt_solution)
+    print("Execution Time: ","%.5f"%(time_cost))
+    print("Error: ", "%.2f"%(error), "%\n")
